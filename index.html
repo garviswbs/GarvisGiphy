@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Garvis Giphy</title>
+
+  <!--Reset CSS-->
+  <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
+</head>
+
+
+<body>
+  <div class="page-header">
+    <h1>The Garvis Giphy</h1>
+  </div>
+
+  <div id="animalButtons">
+
+    <!-- Rendered Buttons will get Dumped Here  -->
+    <div id="buttons-view"></div>
+  </div>
+
+  <form id="animal-form">
+    <label for="animal-input">Add an animal</label>
+    <input type="text" id="animal-input"><br>
+
+    <input id="add-animal" type="submit" value="Submit">
+  </form>
+
+  <div id="animals">
+    <div id="gifs-appear-here">
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  <script type="text/javascript">
+  // Initial array of movies
+  var animals = ['Dog', 'Cat', 'Fish'];
+
+  // Generic function for capturing the animal name from the data-attribute
+  function alertAnimalName() {
+    var animalName = $(this).attr('data-name');
+
+    alert(animalName);
+  }
+
+  // Function for displaying animal data
+  function renderButtons() {
+
+    // Deleting the animals prior to adding new movies
+    // (this is necessary otherwise we will have repeat buttons)
+    $('#buttons-view').empty();
+
+    // Looping through the array of animals
+    for (var i = 0; i < animals.length; i++) {
+
+      // Then dynamicaly generating buttons for each animal in the array
+      // This code $('<button>') is all jQuery needs to create the start/end tag. (<button></button>)
+      var a = $('<button>');
+      // Adding a class of movie to our button
+      a.addClass('animal');
+      // Adding a data-attribute
+      a.attr('data-name', animals[i]);
+      // Providing the initial button text
+      a.text(animals[i]);
+      // Adding the button to the HTML
+      $('#buttons-view').append(a);
+    }
+  }
+
+  // This function handles events where one button is clicked
+  $('#add-animal').on('click', function(event) {
+    // Preventing the buttons default behavior when clicked (which is submitting a form)
+    event.preventDefault();
+    // This line grabs the input from the textbox
+    var animal = $('#animal-input').val().trim();
+
+    // Adding the movie from the textbox to our array
+    animals.push(animal);
+
+    // Calling renderButtons which handles the processing of our movie array
+    renderButtons();
+
+  });
+
+  // Function for displaying the movie info
+  // We're adding a click event listener to all elements with the class 'movie'
+  // We're adding the event listener to the document because it will work for dynamically generated elements
+  // $('.movies').on('click') will only add listeners to elements that are on the page at that time
+  $(document).on('click', '.animal', alertAnimalName);
+
+  // Calling the renderButtons function to display the intial buttons
+  renderButtons();
+
+  // Example queryURL for Giphy API
+  /*var queryURL = 'https://api.giphy.com/v1/gifs/?api_key=fuvneWfkyfWIqHUdIRfzTYmbU24LK5CF';
+  $.ajax({
+    url: queryURL,
+    method: 'GET',
+  }).done(function (response) {
+    console.log(response);
+  });*/
+
+
+  // Adding click event listen listener to all buttons
+  $('button').on('click', function() {
+    // Grabbing and storing the data-animal property value from the button
+    var animal = $(this).attr('data-animal');
+
+    // Constructing a queryURL using the animal name
+    var queryURL = 'https://api.giphy.com/v1/gifs/search?q='+animal+'&api_key=fuvneWfkyfWIqHUdIRfzTYmbU24LK5CF';
+
+    // Performing an AJAX request with the queryURL
+    $.ajax({
+        url: queryURL,
+        method: 'GET'
+      })
+      // After data comes back from the request
+      .done(function(response) {
+        console.log(queryURL);
+
+        console.log(response);
+        // storing the data from the AJAX request in the results variable
+        var results = response.data;
+
+        // Looping through each result item
+        for (var i = 0; i < results.length; i++) {
+
+          // Creating and storing a div tag
+          var animalDiv = $('<div>');
+
+          // Creating a paragraph tag with the result item's rating
+          var p = $('<p>').text('Rating: ' + results[i].rating);
+
+          // Creating and storing an image tag
+          var animalImage = $('<img>');
+          // Setting the src attribute of the image to a property pulled off the result item
+          animalImage.attr('src', results[i].images.fixed_height.url);
+
+          // Appending the paragraph and image tag to the animalDiv
+          animalDiv.append(p);
+          animalDiv.append(animalImage);
+
+          // Prependng the animalDiv to the HTML page in the '#gifs-appear-here' div
+          $('#gifs-appear-here').prepend(animalDiv);
+        }
+      });
+  });
+
+
+
+
+
+
+  </script>
+
+
+</body>
+
+</html>
